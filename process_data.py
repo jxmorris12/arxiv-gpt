@@ -28,7 +28,8 @@ cursor = conn.cursor()
 # table 1: documents
 cursor.execute('''CREATE TABLE IF NOT EXISTS documents
                   (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                   data JSON)''')
+                    date DATE,
+                    data JSON)''')
 
 # table 2: author names
 cursor.execute('''CREATE TABLE IF NOT EXISTS authors
@@ -38,8 +39,8 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS authors
 
 def load_data() -> List[Dict[str, Any]]:
     # data from here: https://www.kaggle.com/datasets/Cornell-University/arxiv?resource=download
-    filename = os.path.join(data_folder, 'arxiv-metadata-oai-snapshot-small.json')
-    # filename = os.path.join(data_folder, 'arxiv-metadata-oai-snapshot.json')
+    # filename = os.path.join(data_folder, 'arxiv-metadata-oai-snapshot-tiny.json')
+    filename = os.path.join(data_folder, 'arxiv-metadata-oai-snapshot.json')
     logging.info("processing file %s", filename)
     lines = open(filename).readlines()
     return [json.loads(line) for line in tqdm.tqdm(lines, desc="processing lines", leave=False)]
@@ -67,7 +68,7 @@ def main():
 
     # 3. store full docs in elasticsearch.
     for obj in tqdm.tqdm(data, desc="writing data to sqlite"):
-        cursor.execute("INSERT INTO documents (data) VALUES (?)", (json.dumps(obj),))
+        cursor.execute("INSERT INTO documents (date, data) VALUES (?,?)", (obj["update_date"], json.dumps(obj),))
     
     conn.commit()
     conn.close()

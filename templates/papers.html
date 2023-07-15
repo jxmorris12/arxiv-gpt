@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="p-16">
+        {% for paper in papers %}
+         <div class="m-8 bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="p-6">
+              <h2 class="text-3xl font-bold mb-4 text-gray-900">{{paper.title}}</h2>
+              <p class="text-gray-600 mb-2">Authors: {{paper.authors}}</p>
+              <p class="text-gray-600 mb-2">Date: {{paper.update_date}}</p>
+              <p class="text-gray-800">{{paper.abstract | truncate(400, true, '...')}}</p>
+            </div>
+          </div>
+        {% endfor %}
+    </div>
+{% endblock %}

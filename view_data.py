@@ -26,8 +26,9 @@ def main():
     # Print the random documents
     print("Random Documents:")
     for document in random_documents:
-        doc_id, doc_data = document
+        doc_id, date, doc_data = document
         print(f"Document ID: {doc_id}")
+        print(f"Document Date:", date)
         print(f"Document Data: {doc_data}")
         print()
 
