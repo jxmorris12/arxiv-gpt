@@ -1,0 +1,27 @@
+<html>
+<head>
+    <title>arxiv-gpt</title>
+    <!-- Add your CSS and other common elements here -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="flex flex-row">
+        <nav class="">
+        <div id="nav" class="flex-none bg-gray-900 bg-gray-900 px-2 text-center pt-12 h-screen border-r-4 border-gray-600 text-xl flex flex-col">
+            <h1 class="text-4xl mb-4 px-8 font-black text-gray-100">arxiv-gpt</h1> 
+            <a class="my-2 font-semibold text-emerald-400" href="/" aria-current="page">Home</a>
+            <a class="my-2 font-semibold text-emerald-400" href="/authors" class="">Authors</a> 
+            <a class="my-2 font-semibold text-emerald-400" href="/topics" class="">Topics</a> 
+            <a class="my-2 font-semibold text-emerald-400" href="/papers" class="">Papers</a> 
+        </div>
+        </nav>
+        <div class="content">
+            <!-- This is where the content of the specific pages will be inserted -->
+            {% block content %}{% endblock %}
+        </div>
+        <!-- Add your JavaScript and other common elements here -->
+    </div>
+</body>
+</html>
