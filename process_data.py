@@ -1,5 +1,6 @@
 from typing import Any, Dict, List
 
+import collections
 import json
 import logging
 import os
@@ -12,7 +13,8 @@ import tqdm
 logger = logging.getLogger('arxiv-gpt-data-pipeline')
 logger.setLevel(logging.INFO)
 
-ACCEPTABLE_CATEGORIES = {"cs.LG", "cs.AI", "cs.CL"}
+ACCEPTABLE_CATEGORIES = {"cs.CL"}
+# ACCEPTABLE_CATEGORIES = {"cs.LG", "cs.AI", "cs.CL"}
 
 # chatGPT gave me the following code which makes logging stuff
 # print to the console. (why doesn't it print to console by default?)
@@ -34,12 +36,13 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS documents
 # table 2: author names
 cursor.execute('''CREATE TABLE IF NOT EXISTS authors
                   (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                   name TEXT)''')
+                   name TEXT,
+                   titles TEXT)''')
 
 
 def load_data() -> List[Dict[str, Any]]:
     # data from here: https://www.kaggle.com/datasets/Cornell-University/arxiv?resource=download
-    # filename = os.path.join(data_folder, 'arxiv-metadata-oai-snapshot-tiny.json')
+    # filename = os.path.join(data_folder, 'arxiv-metadata-oai-snapshot-small.json')
     filename = os.path.join(data_folder, 'arxiv-metadata-oai-snapshot.json')
     logging.info("processing file %s", filename)
     lines = open(filename).readlines()
@@ -50,21 +53,26 @@ def main():
 
     ## 1. filter data. Only want CS/ML/NLP papers. also get author names.
     data = []
-    authors = []
+    authors = collections.defaultdict(list)
     for d in tqdm.tqdm(raw_data, desc="filtering"):
+        date = d["update_date"]
         categories = set(d["categories"].split())
-        if len(categories & ACCEPTABLE_CATEGORIES) > 0:
+        if len(categories & ACCEPTABLE_CATEGORIES) == 0:
+            continue
+        # elif not ("2021" in date) or ("2022" in date) or ("2023" in date):
+        #     continue
+        else:
             data.append(d)
-            authors.extend(["__".join(a) for a in d["authors_parsed"]])
-
+            for a in d["authors_parsed"]:
+                authors["__".join(a)].append(d["title"].replace("\n", " "))
 
     print(len(data))
     logger.info("filtered data from %d to %d papers.", len(raw_data), len(data))
 
     # 2. extract all authors and save to elasticsearch.
-    for author_name in tqdm.tqdm(authors, "writing authors to sqlite"):
-        cursor.execute("INSERT OR IGNORE INTO authors (name) VALUES (?)",
-                   (author_name,))
+    for author_name, titles in tqdm.tqdm(authors.items(), "writing authors to sqlite"):
+        cursor.execute("INSERT OR IGNORE INTO authors (name, titles) VALUES (?,?)",
+                   (author_name, ", ".join(titles)))
 
     # 3. store full docs in elasticsearch.
     for obj in tqdm.tqdm(data, desc="writing data to sqlite"):

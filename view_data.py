@@ -15,9 +15,10 @@ def main():
     # Print the random authors
     print("Random Authors:")
     for author in random_authors:
-        author_id, author_name = author
+        author_id, author_name, titles = author
         print(f"Author ID: {author_id}")
         print(f"Author Name: {author_name}")
+        print(f"Titles: {titles}")
 
     # Get 5 random documents
     cursor.execute("SELECT * FROM documents ORDER BY RANDOM() LIMIT 5")
