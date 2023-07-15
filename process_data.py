@@ -59,8 +59,8 @@ def main():
         categories = set(d["categories"].split())
         if len(categories & ACCEPTABLE_CATEGORIES) == 0:
             continue
-        # elif not ("2021" in date) or ("2022" in date) or ("2023" in date):
-        #     continue
+        elif not ("2020" in date) or ("2021" in date) or ("2022" in date) or ("2023" in date):
+            continue
         else:
             data.append(d)
             for a in d["authors_parsed"]:

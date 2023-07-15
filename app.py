@@ -3,6 +3,7 @@ import os
 import sqlite3
 
 from flask import Flask, render_template
+from topics import TOPICS
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -21,6 +22,11 @@ def authors():
     print(authors)
     return render_template('authors.html', authors=authors)
 
+@app.route("/topics")
+def topics():
+    # sample doc:
+    return render_template('topics.html', topics=TOPICS)
+
 @app.route("/papers")
 def papers():
     # sample doc:
@@ -32,9 +38,18 @@ def papers():
 
 if __name__ == '__main__':
     data_folder = '/Users/johnmorris/arxiv-gpt/data/'
+
+    # data database
     conn = sqlite3.connect(
         os.path.join(data_folder, 'database.db'), check_same_thread=False
     )
     cursor = conn.cursor()
+
+    # user database
+    user_conn = sqlite3.connect(
+        os.path.join(data_folder, 'user.db'), check_same_thread=False
+    )
+    user_cursor = conn.cursor()
+
     app.run(debug=True)
     conn.close()
