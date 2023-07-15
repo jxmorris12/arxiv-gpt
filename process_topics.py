@@ -2,6 +2,7 @@ from typing import Dict, List
 
 import json
 import os
+import random
 import time
 import threading
 
@@ -28,7 +29,7 @@ def ask_gpt(prompt: str) -> str:
         # model="gpt-4",
         model="gpt-3.5-turbo",
         messages=prompts_list,
-        max_tokens=32,
+        max_tokens=64,
         temperature=0.1,
         top_p=1,
         frequency_penalty=0.25,

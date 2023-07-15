@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import sqlite3
 
 from flask import Flask, render_template
@@ -25,7 +26,12 @@ def authors():
 @app.route("/topics")
 def topics():
     # sample doc:
-    return render_template('topics.html', topics=TOPICS)
+    base_colors = ["slate",  "red", "orange", "amber", "lime", "teal", "sky", "indigo", "violet", "purple", "fuchsia", "pink", "rose"]
+    colors = base_colors
+    while len(colors) < len(TOPICS):
+        colors += base_colors
+    colors = random.sample(colors, k=len(TOPICS))
+    return render_template('topics.html', topics=zip(colors, TOPICS))
 
 @app.route("/papers")
 def papers():
