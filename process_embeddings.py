@@ -41,31 +41,25 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS topics
 
 
 @retry(wait=wait_fixed(1), stop=stop_after_attempt(10))
-def get_embeddings_openai_vanilla_multithread(text_list, model="text-embedding-ada-002", batch_size=32) -> list:
-    batches = math.ceil(len(text_list) / batch_size)
-    outputs = []
-
-    for i in range(len(text_list)):
-        if len(text_list[i]) == 0:
-            print(f"warning: set element {i} to a random sequence")
-            text_list[i] = "random sequence"
-    
-    def process_batch(batch):
-        text_list_batch = text_list[batch * batch_size: (batch + 1) * batch_size]
-        response = openai.Embedding.create(
+def embed(text_list_batch, model):
+    return openai.Embedding.create(
             input=text_list_batch,
             model=model,
-            encoding_format="float",
+            encoding_format="float",  # override default base64 encoding...
         )
-        return [e["embedding"] for e in response["data"]]
-    
-    with ThreadPoolExecutor() as executor:
-        batch_indices = range(batches)
-        results = executor.map(process_batch, batch_indices)
-        
-        for result in results:
-            outputs.extend(result)
-    
+
+def get_embeddings_openai_vanilla(text_list, model="text-embedding-ada-002") -> list:
+    # embeddings model: https://platform.openai.com/docs/guides/embeddings/use-cases
+    #    api ref: https://platform.openai.com/docs/api-reference/embeddings/create
+    # TODO: set up a caching system somehow.
+    import openai
+    # print(f"running openai on text_list of length {len(text_list)}, first element '{text_list[0]}'")
+    batches = math.ceil(len(text_list) / 128)
+    outputs = []
+    for batch in tqdm.trange(batches):
+        text_list_batch = text_list[batch * 128 : (batch + 1) * 128]
+        response = embed(text_list_batch, model)
+        outputs.extend([e["embedding"] for e in response["data"]])
     return outputs
 
 
@@ -87,7 +81,7 @@ def main():
     document_data = list(map(json.loads, document_data))
 
     documents_to_embed = [f"Title: {d['title']}\nAbstract: {d['abstract'][:500]}..." for d in document_data]
-    embeddings = get_embeddings_openai_vanilla_multithread(documents_to_embed)
+    embeddings = get_embeddings_openai_vanilla(documents_to_embed)
 
     collection.add(
         embeddings=embeddings,

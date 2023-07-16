@@ -43,10 +43,10 @@ def papers():
     papers = [json.loads(obj[2]) for obj in objects]
     return render_template('papers.html', papers=papers)
 
-@app.route('/save/paper/<str:paper_id>', methods=['POST'])
+@app.route('/save/paper/<string:paper_id>', methods=['POST'])
 def save_paper(paper_id: str):
     # Perform the POST request
-    response = requests.post('http://example.com/your-post-endpoint', data={'number': num})
+    response = requests.post('http://example.com/your-post-endpoint', data={'id': paper_id})
 
     # Check the response and return a result
     if response.status_code == 200:

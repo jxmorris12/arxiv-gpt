@@ -1,0 +1,30 @@
+<script>
+    // Get a reference to the SVG element
+    var addListener = function() {
+        let elementId = "save-{{id}}";
+        let svgElement = document.getElementById(elementId);
+
+        console.log("{{id}}");
+
+        // Attach a click event listener to the SVG element
+        svgElement.addEventListener("click", function() {
+            // Create an XMLHttpRequest object
+            var xhr = new XMLHttpRequest();
+
+            // Prepare the request
+            xhr.open("POST", "/save/paper/{{id}}", true);
+
+            // Set the content type header if necessary
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            // Convert the data to JSON format
+            var jsonData = JSON.stringify({});
+
+            // Send the request
+            xhr.send(jsonData);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', addListener);
+</script>
+<div class="inline" id="save-{{id}}">{% include './shapes/bookmark_outline.html' %}</div>

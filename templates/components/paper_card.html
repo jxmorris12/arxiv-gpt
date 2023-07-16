@@ -1,0 +1,12 @@
+
+<div class="m-8 bg-white hover:bg-gray-200 shadow-lg rounded-lg overflow-hidden">
+  <div class="p-6">
+    <div>
+      {% set id=paper.id %}
+      <span class="text-3xl font-bold mb-4 text-gray-900">{% include './components/bookmark_button.html' %} {{paper.title}}</span>
+    </div>
+    <p class="text-gray-600 mb-2">Authors: {{paper.authors}}</p>
+    <p class="text-gray-600 mb-2">Date: {{paper.update_date}}</p>
+    <p class="text-gray-800">{{paper.abstract | truncate(400, true, '...')}}</p>
+  </div>
+</div>
