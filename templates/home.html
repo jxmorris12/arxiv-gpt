@@ -2,15 +2,15 @@
 
 {% block content %}
     <div class="p-16">
-        <p class="mb-2">{{ saved_paper_ids | length}} saved papers.</p>
+        <p class="mb-2">Found {{ saved_paper_ids | length}} saved papers for recommending.</p>
         <br>
         {% if saved_paper_ids | length == 0 %}
             Select some papers, topics, or authors to see recommendations.
         {% endif %}
 
         {% if closest_papers | length > 0 %}
-            <h1 class="text-2xl my-4"><span class="text-rose-900 font-black">Research area name:</span> {{title}} </h1>
-            <p class="text-md text-gray-500 my-4">{{summary}}</p>
+            <h1 class="text-2xl my-4"><span class="text-rose-900 font-black">Research area name:</span>  {{title}} </h1>
+            <p class="text-lg text-gray-500 my-8">{{summary}}</p>
         {% endif %}
         {% for paper in closest_papers %}
             <div class="m-8 bg-white hover:bg-gray-200 shadow-lg rounded-lg overflow-hidden p-6">
@@ -20,8 +20,11 @@
                 </div>
                 <p class="text-blue-500 font-semibold"><a href="https://arxiv.org/abs/{{paper.id}}">Link</a></p>
                 {% set score=paper.score %}
-                <p class="text-emerald-600 mb-2 font-semibold">Score: {{paper.score | round(precision=3)}}</p>
+                <p class="text-emerald-600 mb-2 font-semibold">Score: {{(paper.score * 100) | round(precision=2)}}</p>
                 {% include './components/progress_bar.html' %}
+
+                <!-- next thing doesn't work bc most papers aren't on that website. -->
+                <!-- <img src="https://arxiv-sanity-lite.com/static/thumb/{{ paper.id }}.jpg" /> -->
             </div>
         {% endfor %}
     </div>
