@@ -1,0 +1,65 @@
+<style>
+    .progress-bar {
+        width: 200px;
+        height: 20px;
+        background-color: #f0f0f0;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress {
+        width: 0%;
+        height: 100%;
+        background-color: #42b983;
+        transition: width 0.5s ease-in-out;
+    }
+
+</style>
+
+{% autoescape false %}
+
+<script>
+    function interpolateColor(color1, color2, factor) {
+        const hsl1 = color1.match(/\d+/g).map(Number);
+        const hsl2 = color2.match(/\d+/g).map(Number);
+
+        const h = Math.round((1 - factor) * hsl1[0] + factor * hsl2[0]);
+        const s = Math.round((1 - factor) * hsl1[1] + factor * hsl2[1]);
+        const l = Math.round((1 - factor) * hsl1[2] + factor * hsl2[2]);
+
+        return `hsl(${h}, ${s}%, ${l}%)`;
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // set width based on score
+        let elementId = 'progress-{{id | replace(".", "-")}}';
+        console.log('finding el:', elementId)
+        const progress = document.getElementById(elementId);
+        progress.style.width = ({{ score }} * 100).toString() + '%';
+        console.log('printing score {{score}}');
+
+        // set color based on score
+        // const colorRanges = [
+        //     { color: 'rgb(255, 0, 0)', score: 0 },
+        //     { color: 'rgb(255, 255, 0)', score: 0.5 },
+        //     { color: 'rgb(0, 128, 0)', score: 1 }
+        // ];
+            
+        const colorRanges = [
+            { color: 'hsl(0, 100%, 50%)', score: 0 },
+            { color: 'hsl(60, 100%, 50%)', score: 0.5 },
+            { color: 'hsl(120, 100%, 25%)', score: 1 }
+        ];
+
+        const currentRange = colorRanges.find(range => {{score}} <= range.score);
+        const factor = ({{score}} - currentRange.score) / (currentRange.score - colorRanges[0].score);
+        const interpolatedColor = interpolateColor(colorRanges[0].color, currentRange.color, factor);
+        // progress.style.backgroundColor = interpolatedColor;
+    })
+</script>
+
+<div class="progress-bar">
+    <div class="progress" id="progress-{{id | replace(".", "-")}}"></div>
+</div>
+
+{% endautoescape %}
