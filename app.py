@@ -4,6 +4,8 @@ import random
 import requests
 import sqlite3
 
+import chromadb
+import numpy as np
 from flask import Flask, render_template
 from topics import TOPICS
 
@@ -15,8 +17,37 @@ app.template_folder = 'templates'  # This assumes your templates are stored in a
 def home():
     paper_ids = user_cursor.execute("SELECT * FROM saved_papers").fetchall()
     paper_ids = [paper_id for id, paper_id in paper_ids]
-    print(paper_ids)
-    return render_template('home.html', paper_ids=paper_ids)
+    print("saved papers:", paper_ids)
+
+    if len(paper_ids) == 0:
+        return render_template('home.html', saved_paper_ids=paper_ids, closest_papers=[])
+
+    # get these embeddings
+    embeddings = []
+    metadatas = []
+    for paper_id in paper_ids:
+        result = chroma_collection.get(
+            where={ "id": paper_id }, 
+            include=["metadatas", "embeddings"]
+        )
+        embeddings.append(result['embeddings'][0])
+        metadatas.append(result['metadatas'][0])
+    
+    # get average & find closest papers
+    avg_embedding = np.array(embeddings).mean(axis=0)
+    result = chroma_collection.query(
+        query_embeddings=avg_embedding[None].tolist(),
+        n_results=10,
+        include=["metadatas", "distances"],
+    )
+    closest_papers = []
+    for m, d in zip(result['metadatas'][0], result['distances'][0]):
+        m['score'] = 1.0 - d
+        closest_papers.append(m)
+    
+    print("paper_ids:", paper_ids)
+    
+    return render_template('home.html', saved_paper_ids=paper_ids, closest_papers=closest_papers)
 
 @app.route("/authors")
 def authors():
@@ -80,6 +111,14 @@ if __name__ == '__main__':
                     (id INTEGER PRIMARY KEY AUTOINCREMENT,
                     paper_id TEXT)''')
 
+    # chroma database
+    chroma_client = chromadb.Client(
+        chromadb.config.Settings(
+            persist_directory="data/.chroma",
+            chroma_db_impl='duckdb+parquet',
+        )
+    )
+    chroma_collection = chroma_client.get_or_create_collection("embeddings")
 
     app.run(debug=True, port=8001)
     conn.close()

@@ -72,7 +72,6 @@ def main():
     )
     collection = client.get_or_create_collection("embeddings")
 
-    # import pdb; pdb.set_trace()
     # pull all documents
     # Get 5 random documents
     data_cursor.execute("SELECT * FROM documents")
