@@ -2,6 +2,12 @@
 
 {% block content %}
     <div class="p-16">
-        Select some papers, topics, or authors to see recommendations.
+        Found {{ paper_ids | length}} saved papers.
+        <br>
+        {% if paper_ids | length == 0 %}
+            Select some papers, topics, or authors to see recommendations.
+        {% else %}
+            {% for paper_id in paper_ids %} {{ paper_id }} {% endfor %}
+        {% endif %}
     </div>
 {% endblock %}
