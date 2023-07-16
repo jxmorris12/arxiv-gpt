@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import requests
 import sqlite3
 
 from flask import Flask, render_template
@@ -41,6 +42,17 @@ def papers():
     objects = cursor.fetchall()
     papers = [json.loads(obj[2]) for obj in objects]
     return render_template('papers.html', papers=papers)
+
+@app.route('/save/paper/<str:paper_id>', methods=['POST'])
+def save_paper(paper_id: str):
+    # Perform the POST request
+    response = requests.post('http://example.com/your-post-endpoint', data={'number': num})
+
+    # Check the response and return a result
+    if response.status_code == 200:
+        return 'POST request successful'
+    else:
+        return 'POST request failed'
 
 if __name__ == '__main__':
     data_folder = '/Users/johnmorris/arxiv-gpt/data/'
